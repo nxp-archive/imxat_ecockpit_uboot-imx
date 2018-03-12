@@ -1290,6 +1290,11 @@ static void parameters_setup(void)
 				CONFIG_FASTBOOT_BUF_SIZE;
 }
 
+__weak int mmc_get_env_dev(void)
+{
+	return CONFIG_SYS_MMC_ENV_DEV;
+}
+
 static int _fastboot_setup_dev(int *switched)
 {
 	char *fastboot_env;
