@@ -522,6 +522,12 @@ enum boot_device get_boot_device(void)
 
 	sc_rsrc_t dev_rsrc;
 
+#if defined(CONFIG_TARGET_IMX8QM_MEK_A72_ONLY)
+	return MMC1_BOOT;
+#elif defined(CONFIG_TARGET_IMX8QM_MEK_A53_ONLY)
+	return SD2_BOOT;
+#endif
+
 	sc_misc_get_boot_dev(-1, &dev_rsrc);
 
 	switch (dev_rsrc) {
