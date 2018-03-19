@@ -690,6 +690,16 @@ enum boot_device get_boot_device(void)
 	sc_ipc_t ipcHndl = 0;
 	sc_rsrc_t dev_rsrc;
 
+	/* eCockpit: HACK: hardcode boot device for ecockpit partition
+	 * TODO: modify SCU FW to detect HW partition and return correct
+	 * boot device
+	 */
+#if defined(CONFIG_TARGET_IMX8QM_MEK_A72_ONLY)
+	return MMC1_BOOT;
+#elif defined(CONFIG_TARGET_IMX8QM_MEK_A53_ONLY)
+	return SD2_BOOT;
+#endif
+
 	/* Note we only support android in EMMC SDHC0 */
 	if (IS_ENABLED(CONFIG_XEN))
 		return MMC1_BOOT;
