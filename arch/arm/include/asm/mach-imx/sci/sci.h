@@ -40,7 +40,11 @@
 #define SC_IPC_AP_CH4       	(MU_BASE_ADDR(4))
 
 #ifndef SC_IPC_CH
+#if defined(CONFIG_TARGET_IMX8QM_MEK_A72_ONLY)
+#define SC_IPC_CH		SC_IPC_AP_CH2
+#else
 #define SC_IPC_CH		SC_IPC_AP_CH1
+#endif
 #endif
 
 /* Types */
