@@ -60,8 +60,10 @@ static int imx8_power_domain_on(struct power_domain *power_domain)
 		return 0;
 
 	if (pdata->resource_id != SC_R_NONE) {
-		if (!sc_rm_is_resource_owned(ipcHndl, pdata->resource_id))
+		if (!sc_rm_is_resource_owned(ipcHndl, pdata->resource_id)) {
 			printf("%s [%d] not owned by curr partition\n", dev->name, pdata->resource_id);
+			return 0;
+		}
 
 		ret = sc_pm_set_resource_power_mode(ipcHndl, pdata->resource_id, SC_PM_PW_MODE_ON);
 		if (ret) {
