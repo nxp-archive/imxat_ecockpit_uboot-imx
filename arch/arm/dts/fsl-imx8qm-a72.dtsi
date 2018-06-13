@@ -30,27 +30,10 @@
 	#size-cells = <2>;
 
 	aliases {
-		csi0 = &mipi_csi_0;
-		csi1 = &mipi_csi_1;
-		dpu0 = &dpu1;
 		dpu1 = &dpu2;
-		ethernet0 = &fec1;
 		ethernet1 = &fec2;
-		ldb0 = &ldb1;
 		ldb1 = &ldb2;
-		isi0 = &isi_0;
-		isi1 = &isi_1;
-		isi2 = &isi_2;
-		isi3 = &isi_3;
-		isi4 = &isi_4;
-		isi5 = &isi_5;
-		isi6 = &isi_6;
-		isi7 = &isi_7;
-		serial0 = &lpuart0;
-		serial1 = &lpuart1;
 		serial2 = &lpuart2;
-		serial3 = &lpuart3;
-		serial4 = &lpuart4;
 		gpio0 = &gpio0;
 		gpio1 = &gpio1;
 		gpio2 = &gpio2;
@@ -61,21 +44,12 @@
 		gpio7 = &gpio7;
 		i2c0 = &i2c0;
 		i2c1 = &i2c1;
-		i2c2 = &i2c2;
-		i2c3 = &i2c3;
-		i2c4 = &i2c4;
-		i2c6 = &i2c1_lvds0;
 		i2c8 = &i2c1_lvds1;
-		usb0 = &usbotg1;
-		usbphy0 = &usbphy1;
-		usb1 = &usb2;
-		usbphy1 = &usb2_phy;
-		spi0 = &flexspi0;
 	};
 
-	memory@80000000 {
+	memory@c0000000 {
 		device_type = "memory";
-		reg = <0x00000000 0x80000000 0 0x40000000>;
+		reg = <0x00000000 0xc0000000 0 0x40000000>;
 		      /* DRAM space - 1, size : 1 GB DRAM */
 	};
 
@@ -89,7 +63,7 @@
 			compatible = "shared-dma-pool";
 			reusable;
 			size = <0 0x28000000>;
-			alloc-ranges = <0 0x80000000 0 0x80000000>;
+			alloc-ranges = <0 0xc0000000 0 0xc0000000>;
 			linux,cma-default;
 		};
 	};
@@ -122,9 +96,9 @@
 
 	mu: mu@5d1b0000 {
 		compatible = "fsl,imx8-mu";
-		reg = <0x0 0x5d1b0000 0x0 0x10000>;
+		reg = <0x0 0x5d1b0000 0x0 0x50000>;
 		interrupts = <GIC_SPI 176 IRQ_TYPE_LEVEL_HIGH>;
-		fsl,scu_ap_mu_id = <0>;
+		fsl,scu_ap_mu_id = <2>;
 		#mbox-cells = <4>;
 		status = "okay";
 	};
@@ -2189,7 +2163,7 @@
 
 	imx8_gpu_ss: imx8_gpu_ss {
 		compatible = "fsl,imx8qm-gpu", "fsl,imx8-gpu-ss";
-		cores = <&gpu_3d0>, <&gpu_3d1>;
+		cores = <&gpu_3d1>;
 		reg = <0x0 0x80000000 0x0 0x80000000>, <0x0 0x0 0x0 0x8000000>;
 		reg-names = "phys_baseaddr", "contiguous_mem";
 		status = "disabled";
@@ -2281,7 +2255,6 @@
 		fsl,num-tx-queues=<3>;
 		fsl,num-rx-queues=<3>;
 		power-domains = <&pd_conn_enet0>;
-		iommus = <&smmu 0x12 0x7f80>;
 		status = "disabled";
 	};
 
@@ -2302,7 +2275,6 @@
 		fsl,num-tx-queues=<3>;
 		fsl,num-rx-queues=<3>;
 		power-domains = <&pd_conn_enet1>;
-		iommus = <&smmu 0x12 0x7f80>;
 		status = "disabled";
 	};
 
@@ -2612,8 +2584,7 @@
 
 	display-subsystem {
 		compatible = "fsl,imx-display-subsystem";
-		ports = <&dpu1_disp0>, <&dpu1_disp1>,
-			<&dpu2_disp0>, <&dpu2_disp1>;
+		ports = <&dpu2_disp0>, <&dpu2_disp1>;
 	};
 
 	dma_cap: dma_cap {
