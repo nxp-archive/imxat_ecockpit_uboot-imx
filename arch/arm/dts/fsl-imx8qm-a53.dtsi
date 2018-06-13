@@ -30,25 +30,11 @@
 	#size-cells = <2>;
 
 	aliases {
-		csi0 = &mipi_csi_0;
-		csi1 = &mipi_csi_1;
 		dpu0 = &dpu1;
-		dpu1 = &dpu2;
 		ethernet0 = &fec1;
-		ethernet1 = &fec2;
 		ldb0 = &ldb1;
-		ldb1 = &ldb2;
-		isi0 = &isi_0;
-		isi1 = &isi_1;
-		isi2 = &isi_2;
-		isi3 = &isi_3;
-		isi4 = &isi_4;
-		isi5 = &isi_5;
-		isi6 = &isi_6;
-		isi7 = &isi_7;
 		serial0 = &lpuart0;
 		serial1 = &lpuart1;
-		serial2 = &lpuart2;
 		serial3 = &lpuart3;
 		serial4 = &lpuart4;
 		gpio0 = &gpio0;
@@ -59,13 +45,10 @@
 		gpio5 = &gpio5;
 		gpio6 = &gpio6;
 		gpio7 = &gpio7;
-		i2c0 = &i2c0;
-		i2c1 = &i2c1;
 		i2c2 = &i2c2;
 		i2c3 = &i2c3;
 		i2c4 = &i2c4;
 		i2c6 = &i2c1_lvds0;
-		i2c8 = &i2c1_lvds1;
 		usb0 = &usbotg1;
 		usbphy0 = &usbphy1;
 		usb1 = &usb2;
@@ -2189,7 +2172,7 @@
 
 	imx8_gpu_ss: imx8_gpu_ss {
 		compatible = "fsl,imx8qm-gpu", "fsl,imx8-gpu-ss";
-		cores = <&gpu_3d0>, <&gpu_3d1>;
+		cores = <&gpu_3d0>;
 		reg = <0x0 0x80000000 0x0 0x80000000>, <0x0 0x0 0x0 0x8000000>;
 		reg-names = "phys_baseaddr", "contiguous_mem";
 		status = "disabled";
@@ -2281,7 +2264,6 @@
 		fsl,num-tx-queues=<3>;
 		fsl,num-rx-queues=<3>;
 		power-domains = <&pd_conn_enet0>;
-		iommus = <&smmu 0x12 0x7f80>;
 		status = "disabled";
 	};
 
@@ -2302,7 +2284,6 @@
 		fsl,num-tx-queues=<3>;
 		fsl,num-rx-queues=<3>;
 		power-domains = <&pd_conn_enet1>;
-		iommus = <&smmu 0x12 0x7f80>;
 		status = "disabled";
 	};
 
@@ -2612,8 +2593,7 @@
 
 	display-subsystem {
 		compatible = "fsl,imx-display-subsystem";
-		ports = <&dpu1_disp0>, <&dpu1_disp1>,
-			<&dpu2_disp0>, <&dpu2_disp1>;
+		ports = <&dpu1_disp0>, <&dpu1_disp1>;
 	};
 
 	dma_cap: dma_cap {
