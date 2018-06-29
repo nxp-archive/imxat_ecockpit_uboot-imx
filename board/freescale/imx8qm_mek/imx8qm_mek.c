@@ -51,20 +51,32 @@ DECLARE_GLOBAL_DATA_PTR;
 #define UART_PAD_CTRL	((SC_PAD_CONFIG_OUT_IN << PADRING_CONFIG_SHIFT) | (SC_PAD_ISO_OFF << PADRING_LPCONFIG_SHIFT) \
 						| (SC_PAD_28FDSOI_DSE_DV_HIGH << PADRING_DSE_SHIFT) | (SC_PAD_28FDSOI_PS_PU << PADRING_PULL_SHIFT))
 
+#ifdef CONFIG_TARGET_IMX8QM_MEK_A72_ONLY
+static iomux_cfg_t uart2_pads[] = {
+	SC_P_UART0_RTS_B | MUX_MODE_ALT(2) | MUX_PAD_CTRL(UART_PAD_CTRL),
+	SC_P_UART0_CTS_B | MUX_MODE_ALT(2) | MUX_PAD_CTRL(UART_PAD_CTRL),
+};
+#else
 static iomux_cfg_t uart0_pads[] = {
 	SC_P_UART0_RX | MUX_PAD_CTRL(UART_PAD_CTRL),
 	SC_P_UART0_TX | MUX_PAD_CTRL(UART_PAD_CTRL),
 };
+#endif
 
 static void setup_iomux_uart(void)
 {
+#ifdef CONFIG_TARGET_IMX8QM_MEK_A72_ONLY
+	imx8_iomux_setup_multiple_pads(uart2_pads, ARRAY_SIZE(uart2_pads));
+#else
 	imx8_iomux_setup_multiple_pads(uart0_pads, ARRAY_SIZE(uart0_pads));
+#endif
 }
 
 int board_early_init_f(void)
 {
 	sc_ipc_t ipcHndl = 0;
 	sc_err_t sciErr = 0;
+	sc_pm_clock_rate_t rate;
 
 	/* When start u-boot in XEN VM, directly return */
 	if (IS_ENABLED(CONFIG_XEN)) {
@@ -74,13 +86,38 @@ int board_early_init_f(void)
 
 	ipcHndl = gd->arch.ipc_channel_handle;
 
+#ifdef CONFIG_TARGET_IMX8QM_MEK_A72_ONLY
+	/* Power up UART2, this is very early while power domain is not working */
+	sciErr = sc_pm_set_resource_power_mode(ipcHndl, SC_R_UART_2, SC_PM_PW_MODE_ON);
+	if (sciErr != SC_ERR_NONE)
+		return 0;
+
+	/* Set UART2 clock root to 80 MHz */
+	rate = 80000000;
+	sciErr = sc_pm_set_clock_rate(ipcHndl, SC_R_UART_2, 2, &rate);
+	if (sciErr != SC_ERR_NONE)
+		return 0;
+
+	/* Enable UART2 clock root */
+	sciErr = sc_pm_clock_enable(ipcHndl, SC_R_UART_2, 2, true, false);
+	if (sciErr != SC_ERR_NONE)
+		return 0;
+
+	/* Enable UART2 clock root */
+	sciErr = sc_pm_clock_enable(ipcHndl, SC_R_UART_2, 2, true, false);
+	if (sciErr != SC_ERR_NONE)
+		return 0;
+
+	LPCG_AllClockOn(LPUART_2_LPCG);
+
+#else
 	/* Power up UART0, this is very early while power domain is not working */
 	sciErr = sc_pm_set_resource_power_mode(ipcHndl, SC_R_UART_0, SC_PM_PW_MODE_ON);
 	if (sciErr != SC_ERR_NONE)
 		return 0;
 
 	/* Set UART0 clock root to 80 MHz */
-	sc_pm_clock_rate_t rate = 80000000;
+	rate = 80000000;
 	sciErr = sc_pm_set_clock_rate(ipcHndl, SC_R_UART_0, 2, &rate);
 	if (sciErr != SC_ERR_NONE)
 		return 0;
@@ -91,6 +128,7 @@ int board_early_init_f(void)
 		return 0;
 
 	LPCG_AllClockOn(LPUART_0_LPCG);
+#endif
 
 	setup_iomux_uart();
 
@@ -199,6 +237,7 @@ int board_phy_config(struct phy_device *phydev)
 
 static void board_gpio_init(void)
 {
+#if defined(CONFIG_TARGET_IMX8QM_MEK) || defined(CONFIG_TARGET_IMX8QM_MEK_A53_ONLY)
 	/* Enable BB 3V3 */
 	gpio_request(BB_GPIO_3V3_1, "bb_3v3_1");
 	gpio_direction_output(BB_GPIO_3V3_1, 1);
@@ -214,12 +253,19 @@ static void board_gpio_init(void)
 	/* enable MIPI SAS boards */
 	gpio_request(MIPI_ENABLE, "mipi_enable");
 	gpio_direction_output(MIPI_ENABLE, 1);
+#endif
 }
 #endif
 
 int checkboard(void)
 {
+#if defined(CONFIG_TARGET_IMX8QM_MEK_A53_ONLY)
+	puts("Board: iMX8QM-A53 MEK\n");
+#elif defined(CONFIG_TARGET_IMX8QM_MEK_A72_ONLY)
+	puts("Board: iMX8QM-A72 MEK\n");
+#else
 	puts("Board: iMX8QM MEK\n");
+#endif
 
 	print_bootinfo();
 
@@ -517,20 +563,30 @@ int ft_board_setup(void *blob, bd_t *bd)
 
 int board_mmc_get_env_dev(int devno)
 {
+#if defined(CONFIG_TARGET_IMX8QM_MEK_A53_ONLY) || defined(CONFIG_TARGET_IMX8QM_MEK_A72_ONLY)
+	return 0;
+#else
 	/* Use EMMC */
 	if (IS_ENABLED(CONFIG_XEN))
 		return 0;
 
 	return devno;
+#endif
 }
 
 int mmc_map_to_kernel_blk(int dev_no)
 {
+#if defined(CONFIG_TARGET_IMX8QM_MEK_A53_ONLY)
+	return 1;
+#elif defined(CONFIG_TARGET_IMX8QM_MEK_A72_ONLY)
+	return 0;
+#else
 	/* Use EMMC */
 	if (IS_ENABLED(CONFIG_XEN))
 		return 0;
 
 	return dev_no;
+#endif
 }
 
 extern uint32_t _end_ofs;
@@ -556,7 +612,13 @@ int board_late_init(void)
 		if (m4_boot)
 			env_set("fdt_file", "fsl-imx8qm-mek-rpmsg.dtb");
 		else
+#if defined(CONFIG_TARGET_IMX8QM_MEK_A53_ONLY)
+			env_set("fdt_file", "fsl-imx8qm-mek-a53.dtb");
+#elif defined(CONFIG_TARGET_IMX8QM_MEK_A72_ONLY)
+			env_set("fdt_file", "fsl-imx8qm-mek-a72.dtb");
+#else
 			env_set("fdt_file", "fsl-imx8qm-mek.dtb");
+#endif
 	}
 
 #ifdef CONFIG_ENV_IS_IN_MMC

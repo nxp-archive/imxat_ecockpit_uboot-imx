@@ -105,10 +105,11 @@
 
 #define CONFIG_FSL_HSIO
 #define CONFIG_PCIE_IMX8X
+
 #define CONFIG_CMD_PCI
-#define CONFIG_PCI
-#define CONFIG_PCI_PNP
-#define CONFIG_PCI_SCAN_SHOW
+/* #define CONFIG_PCI */
+/* #define CONFIG_PCI_PNP */
+/* #define CONFIG_PCI_SCAN_SHOW */
 
 #define CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG
 /* FUSE command */
@@ -231,8 +232,8 @@
 	"script=boot.scr\0" \
 	"image=Image\0" \
 	"panel=NULL\0" \
-	"console=ttyLP0\0" \
-	"fdt_addr=0x83000000\0"			\
+	CONFIG_CONSOLE \
+	FDT_ADDR \
 	"fdt_high=0xffffffffffffffff\0"		\
 	"cntr_addr=0x98000000\0"			\
 	"cntr_file=os_cntr_signed.bin\0" \
@@ -242,7 +243,7 @@
 	"mmcpart=" __stringify(CONFIG_SYS_MMC_IMG_LOAD_PART) "\0" \
 	"mmcroot=" CONFIG_MMCROOT " rootwait rw\0" \
 	"mmcautodetect=yes\0" \
-	"mmcargs=setenv bootargs console=${console},${baudrate} earlycon root=${mmcroot}\0 " \
+	"mmcargs=setenv bootargs console=${console},${baudrate} earlycon consoleblank=0 root=${mmcroot}\0 " \
 	"loadbootscript=fatload mmc ${mmcdev}:${mmcpart} ${loadaddr} ${script};\0" \
 	"bootscript=echo Running bootscript from mmc ...; " \
 		"source\0" \
@@ -330,12 +331,28 @@
 	   "else booti ${loadaddr} - ${fdt_addr}; fi"
 
 /* Link Definitions */
-#define CONFIG_LOADADDR			0x80280000
+#ifdef CONFIG_TARGET_IMX8QM_MEK_A72_ONLY
+	#define CONFIG_LOADADDR			0xC0280000
+	#define CONFIG_SYS_TEXT_BASE		0xC0020000
+	#define CONFIG_SYS_LOAD_ADDR		CONFIG_LOADADDR
+	#define CONFIG_SYS_INIT_SP_ADDR		0xC0200000
+#else
+	#define CONFIG_LOADADDR			0x80280000
+	#define CONFIG_SYS_TEXT_BASE		0x80020000
+	#define CONFIG_SYS_LOAD_ADDR		CONFIG_LOADADDR
+	#define CONFIG_SYS_INIT_SP_ADDR		0x80200000
+#endif
 
-#define CONFIG_SYS_LOAD_ADDR           CONFIG_LOADADDR
-
-#define CONFIG_SYS_INIT_SP_ADDR         0x80200000
-
+#if defined(CONFIG_TARGET_IMX8QM_MEK_A72_ONLY)
+	#define FDT_ADDR	"fdt_addr=0xC3000000\0"
+	#define FDT_FILE	"fdt_file=fsl-imx8qm-mek-a72.dtb\0"
+#elif defined(CONFIG_TARGET_IMX8QM_MEK_A53_ONLY)
+	#define FDT_ADDR	"fdt_addr=0x83000000\0"
+	#define FDT_FILE	"fdt_file=fsl-imx8qm-mek-a53.dtb\0"
+#else
+	#define FDT_ADDR	"fdt_addr=0x83000000\0"
+	#define FDT_FILE	"fdt_file=fsl-imx8qm-mek.dtb\0"
+#endif
 
 /* Default environment is in SD */
 #define CONFIG_ENV_SIZE			0x2000
@@ -348,26 +365,57 @@
 #define CONFIG_ENV_SPI_MODE	CONFIG_SF_DEFAULT_MODE
 #define CONFIG_ENV_SPI_MAX_HZ	CONFIG_SF_DEFAULT_SPEED
 #else
+#if defined(CONFIG_TARGET_IMX8QM_MEK_A53_ONLY) || defined(CONFIG_TARGET_IMX8QM_MEK_A72_ONLY)
+#define CONFIG_ENV_IS_NOWHERE
+#else
 #define CONFIG_ENV_OFFSET       (64 * SZ_64K)
+#endif
 #define CONFIG_SYS_MMC_ENV_PART		0	/* user area */
 #endif
 
 #define CONFIG_SYS_MMC_IMG_LOAD_PART	1
 
-#define CONFIG_SYS_MMC_ENV_DEV		1   /* USDHC2 */
-#define CONFIG_MMCROOT			"/dev/mmcblk1p2"  /* USDHC2 */
+#if defined(CONFIG_TARGET_IMX8QM_MEK_A72_ONLY)
+	#define CONFIG_SYS_MMC_ENV_DEV		0  /* USDHC1 */
+	#define CONFIG_MMCROOT			"/dev/mmcblk0p2"  /* USDHC1 */
+#elif defined(CONFIG_TARGET_IMX8QM_MEK_A53_ONLY)
+	#define CONFIG_SYS_MMC_ENV_DEV		0  /* USDHC2, numbered 0 in eCockpit */
+	#define CONFIG_MMCROOT			"/dev/mmcblk1p2"  /* USDHC2 */
+#else
+	#define CONFIG_SYS_MMC_ENV_DEV		1  /* USDHC2 */
+	#define CONFIG_MMCROOT			"/dev/mmcblk1p2"  /* USDHC2 */
+#endif
 #define CONFIG_SYS_FSL_USDHC_NUM	2
 
+#if defined(CONFIG_TARGET_IMX8QM_MEK_A72_ONLY)
+#define CONFIG_CONSOLE "console=ttyLP2\0"
+#else
+#define CONFIG_CONSOLE "console=ttyLP0\0"
+#endif
 
 /* Size of malloc() pool */
 #define CONFIG_SYS_MALLOC_LEN		((CONFIG_ENV_SIZE + (32*1024)) * 1024)
 
-#define CONFIG_SYS_SDRAM_BASE		0x80000000
 #define CONFIG_NR_DRAM_BANKS		4
+#if defined(CONFIG_TARGET_IMX8QM_MEK_A53_ONLY)
+#define CONFIG_SYS_SDRAM_BASE		0x80000000
+#define PHYS_SDRAM_1			0x80000000
+#define PHYS_SDRAM_2			0x880000000
+#define PHYS_SDRAM_1_SIZE		0x40000000	/* 1 GB */
+#define PHYS_SDRAM_2_SIZE		0x80000000	/* 2 GB */
+#elif defined(CONFIG_TARGET_IMX8QM_MEK_A72_ONLY)
+#define CONFIG_SYS_SDRAM_BASE		0xC0000000
+#define PHYS_SDRAM_1			0xC0000000
+#define PHYS_SDRAM_2			0x900000000
+#define PHYS_SDRAM_1_SIZE		0x40000000	/* 1 GB */
+#define PHYS_SDRAM_2_SIZE		0x80000000	/* 2 GB */
+#else
+#define CONFIG_SYS_SDRAM_BASE		0x80000000
 #define PHYS_SDRAM_1			0x80000000
 #define PHYS_SDRAM_2			0x880000000
 #define PHYS_SDRAM_1_SIZE		0x80000000	/* 2 GB */
 #define PHYS_SDRAM_2_SIZE		0x100000000	/* 4 GB */
+#endif
 
 #define CONFIG_SYS_MEMTEST_START    0xA0000000
 #define CONFIG_SYS_MEMTEST_END      (CONFIG_SYS_MEMTEST_START + (PHYS_SDRAM_1_SIZE >> 2))
