@@ -401,7 +401,7 @@
 #define CONFIG_SYS_SDRAM_BASE		0x80000000
 #define PHYS_SDRAM_1			0x80000000
 #define PHYS_SDRAM_2			0x880000000
-#define PHYS_SDRAM_1_SIZE		0x40000000	/* 1 GB */
+#define PHYS_SDRAM_1_SIZE		0x3FE00000	/* 1 GB - backup region size for ecockpit's bootimage */
 #define PHYS_SDRAM_2_SIZE		0x80000000	/* 2 GB */
 #elif defined(CONFIG_TARGET_IMX8QM_MEK_A72_ONLY)
 #define CONFIG_SYS_SDRAM_BASE		0xC0000000
