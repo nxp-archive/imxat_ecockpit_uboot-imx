@@ -320,7 +320,13 @@ int cdns3_disable_clks(int index)
 
 void init_clk_usdhc(u32 index)
 {
-#ifdef CONFIG_IMX8QM
+#if defined(CONFIG_TARGET_IMX8QM_MEK_A53_ONLY)
+	sc_rsrc_t usdhcs[] = {SC_R_SDHC_1};
+	u32 instances = 1;
+#elif defined(CONFIG_TARGET_IMX8QM_MEK_A72_ONLY)
+	sc_rsrc_t usdhcs[] = {SC_R_SDHC_0};
+	u32 instances = 1;
+#elif defined(CONFIG_IMX8QM)
 	sc_rsrc_t usdhcs[] = {SC_R_SDHC_0, SC_R_SDHC_1, SC_R_SDHC_2};
 	u32 instances = 3;
 #else
