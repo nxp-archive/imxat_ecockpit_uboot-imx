@@ -526,7 +526,11 @@ int board_init(void)
 void board_quiesce_devices(void)
 {
 	const char *power_on_devices[] = {
+#ifdef CONFIG_TARGET_IMX8QM_MEK_A72_ONLY
+		"dma_lpuart2",
+#else
 		"dma_lpuart0",
+#endif
 	};
 
 	if (IS_ENABLED(CONFIG_XEN)) {
