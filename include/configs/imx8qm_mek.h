@@ -435,7 +435,11 @@
 /* Generic Timer Definitions */
 #define COUNTER_FREQUENCY		8000000	/* 8MHz */
 
+#ifdef CONFIG_TARGET_IMX8QM_MEK_A53_ONLY
+#undef CONFIG_IMX_SMMU
+#else
 #define CONFIG_IMX_SMMU
+#endif
 
 /* MT35XU512ABA1G12 has only one Die, so QSPI0 B won't work */
 #ifdef CONFIG_FSL_FSPI
