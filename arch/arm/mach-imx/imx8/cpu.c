@@ -108,6 +108,12 @@ int print_cpuinfo(void)
 
 	cpurev = get_cpu_rev();
 
+#if defined(CONFIG_TARGET_IMX8QM_MEK_A72_ONLY)
+	printf("Cortex-A72\n");
+#elif defined(CONFIG_TARGET_IMX8QM_MEK_A53_ONLY)
+	printf("Cortex-A53\n");
+#endif
+
 	printf("CPU:   Freescale i.MX%s rev%s %s at %d MHz",
 			get_imx8_type((cpurev & 0xFF000) >> 12),
 			get_imx8_rev((cpurev & 0xFFF)),
