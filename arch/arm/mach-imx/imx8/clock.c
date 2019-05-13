@@ -382,7 +382,7 @@ void init_clk_usdhc(u32 index)
 		return;
 	}
 
-	LPCG_AllClockOn(USDHC_0_LPCG + index * 0x10000);
+	LPCG_AllClockOn(USDHC_0_LPCG + (usdhcs[index] - SC_R_SDHC_0) * 0x10000);
 }
 
 void init_clk_fec(int index)
