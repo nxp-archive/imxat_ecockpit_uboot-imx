@@ -613,14 +613,14 @@ int board_late_init(void)
 	m4_boot = check_m4_parts_boot();
 
 	if (fdt_file && !strcmp(fdt_file, "undefined")) {
+#if defined(CONFIG_TARGET_IMX8QM_MEK_A53_ONLY)
+		env_set("fdt_file", "fsl-imx8qm-mek-a53.dtb");
+#elif defined(CONFIG_TARGET_IMX8QM_MEK_A72_ONLY)
+		env_set("fdt_file", "fsl-imx8qm-mek-a72.dtb");
+#else
 		if (m4_boot)
 			env_set("fdt_file", "fsl-imx8qm-mek-rpmsg.dtb");
 		else
-#if defined(CONFIG_TARGET_IMX8QM_MEK_A53_ONLY)
-			env_set("fdt_file", "fsl-imx8qm-mek-a53.dtb");
-#elif defined(CONFIG_TARGET_IMX8QM_MEK_A72_ONLY)
-			env_set("fdt_file", "fsl-imx8qm-mek-a72.dtb");
-#else
 			env_set("fdt_file", "fsl-imx8qm-mek.dtb");
 #endif
 	}
