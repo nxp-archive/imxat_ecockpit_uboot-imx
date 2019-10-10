@@ -228,6 +228,14 @@
 	"emmc_dev=0\0" \
 	"sd_dev=1\0" \
 
+#ifdef CONFIG_TARGET_IMX8QM_MEK_A72_ONLY
+#define HDP_LOAD_ENV
+#else
+#define HDP_LOAD_ENV \
+	"if run loadhdp; then; hdp load ${hdp_addr}; fi;" \
+	"if run loadhdprx; then; hdprx load ${hdprx_addr}; fi;"
+#endif
+
 /* Initial environment variables */
 #define CONFIG_EXTRA_ENV_SETTINGS		\
 	CONFIG_MFG_ENV_SETTINGS \
@@ -265,8 +273,7 @@
 	"loadcntr=fatload mmc ${mmcdev}:${mmcpart} ${cntr_addr} ${cntr_file}\0" \
 	"auth_os=auth_cntr ${cntr_addr}\0" \
 	"mmcboot=echo Booting from mmc ...; " \
-		"if run loadhdp; then; hdp load ${hdp_addr}; fi;" \
-		"if run loadhdprx; then; hdprx load ${hdprx_addr}; fi;" \
+		HDP_LOAD_ENV \
 		"run mmcargs; " \
 		"if test ${sec_boot} = yes; then " \
 			"if run auth_os; then " \
