@@ -1584,7 +1584,18 @@ static int fsl_esdhc_probe(struct udevice *dev)
 	 * correctly get the seq as 2 and 3, then let mxc_get_clock
 	 * work as expected.
 	 */
+#if (defined(CONFIG_TARGET_IMX8QM_MEK_A53_ONLY) || \
+	defined(CONFIG_TARGET_IMX8QM_MEK_A72_ONLY))
+	/* to avoid HW partition reboot crashing, */
+	/* need to use the old clocking scheme for SDHC */
+	init_clk_usdhc(dev->seq);
 
+	priv->sdhc_clk = mxc_get_clock(MXC_ESDHC_CLK + dev->seq);
+	if (priv->sdhc_clk <= 0) {
+		dev_err(dev, "Unable to get clk for %s\n", dev->name);
+		return -EINVAL;
+	}
+#else
 	if (CONFIG_IS_ENABLED(CLK)) {
 		/* Assigned clock already set clock */
 		ret = clk_get_by_name(dev, "per", &priv->per_clk);
@@ -1608,6 +1619,7 @@ static int fsl_esdhc_probe(struct udevice *dev)
 			return -EINVAL;
 		}
 	}
+#endif
 
 	ret = fsl_esdhc_init(priv, plat);
 	if (ret) {
