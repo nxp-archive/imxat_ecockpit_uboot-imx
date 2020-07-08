@@ -604,7 +604,11 @@ int mmc_get_env_dev(void)
 	sc_rsrc_t dev_rsrc;
 	int devno;
 
+#ifdef CONFIG_TARGET_IMX8QM_MEK_A72_ONLY
+	dev_rsrc = SC_R_SDHC_0;
+#else
 	sc_misc_get_boot_dev(-1, &dev_rsrc);
+#endif
 
 	switch (dev_rsrc) {
 	case SC_R_SDHC_0:
