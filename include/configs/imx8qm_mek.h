@@ -109,8 +109,10 @@
 #define CONFIG_SYS_SATA_MAX_DEVICE	1
 #endif
 
+#ifndef CONFIG_TARGET_IMX8QM_MEK_A72_ONLY
 #define CONFIG_FSL_HSIO
 #define CONFIG_PCIE_IMX8X
+#endif
 
 #define CONFIG_CMD_PCI
 /* #define CONFIG_PCI */
