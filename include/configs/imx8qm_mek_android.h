@@ -72,7 +72,11 @@
 	"initrd_high=0xffffffffffffffff\0" \
 	"panel=NULL\0" \
 
+#if defined(CONFIG_TARGET_IMX8QM_MEK_A72_ONLY)
+#define CONFIG_FASTBOOT_BUF_ADDR   0xD8000000
+#else
 #define CONFIG_FASTBOOT_BUF_ADDR   0x98000000
+#endif
 #define CONFIG_FASTBOOT_BUF_SIZE   0x19000000
 
 #ifdef CONFIG_IMX_TRUSTY_OS
