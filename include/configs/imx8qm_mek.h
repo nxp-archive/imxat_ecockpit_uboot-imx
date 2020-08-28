@@ -230,8 +230,11 @@
 	"emmc_dev=0\0" \
 	"sd_dev=1\0" \
 
-#ifdef CONFIG_TARGET_IMX8QM_MEK_A72_ONLY
+#if defined(CONFIG_TARGET_IMX8QM_MEK_A72_ONLY)
 #define HDP_LOAD_ENV
+#elif defined(CONFIG_TARGET_IMX8QM_MEK_A53_ONLY)
+#define HDP_LOAD_ENV \
+	"if run loadhdp; then; hdp load ${hdp_addr}; fi;"
 #else
 #define HDP_LOAD_ENV \
 	"if run loadhdp; then; hdp load ${hdp_addr}; fi;" \
