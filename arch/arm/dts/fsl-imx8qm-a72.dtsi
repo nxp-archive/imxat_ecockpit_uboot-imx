@@ -45,6 +45,7 @@
 		i2c0 = &i2c0;
 		i2c1 = &i2c1;
 		i2c8 = &i2c1_lvds1;
+		usb0 = &usbotg1;
 	};
 
 	memory@c0000000 {

@@ -36,9 +36,9 @@
 			regulator-name = "usb_otg1_vbus";
 			regulator-min-microvolt = <5000000>;
 			regulator-max-microvolt = <5000000>;
-			gpio = <&gpio4 3 GPIO_ACTIVE_HIGH>;
+/*			gpio = <&gpio4 3 GPIO_ACTIVE_HIGH>; */
 			enable-active-high;
-			status = "disabled";
+			status = "okay";
 		};
 
 	};
@@ -192,12 +192,12 @@
 };
 
 &usbotg1 {
-	vbus-supply = <&reg_usb_otg1_vbus>;
+/*	vbus-supply = <&reg_usb_otg1_vbus>; */
 	srp-disable;
 	hnp-disable;
 	adp-disable;
 	disable-over-current;
-	status = "disabled";
+	status = "okay";
 };
 
 &i2c0 {
