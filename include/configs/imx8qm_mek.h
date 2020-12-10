@@ -511,7 +511,11 @@
 #if defined(CONFIG_ANDROID_SUPPORT)
 #include "imx8qm_mek_android.h"
 #elif defined (CONFIG_ANDROID_AUTO_SUPPORT)
+#if defined (CONFIG_TARGET_IMX8QM_MEK_A72_ONLY)
+#include "imx8qm_mek_android.h"
+#else
 #include "imx8qm_mek_android_auto.h"
+#endif /* CONFIG_TARGET_IMX8QM_MEK_A72_ONLY */
 #elif defined (CONFIG_IMX8_TRUSTY_XEN)
 #include "imx8qm_mek_trusty_xen.h"
 #endif
