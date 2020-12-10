@@ -52,24 +52,39 @@ DECLARE_GLOBAL_DATA_PTR;
 						| (SC_PAD_28FDSOI_DSE_DV_HIGH << PADRING_DSE_SHIFT) | (SC_PAD_28FDSOI_PS_PU << PADRING_PULL_SHIFT))
 
 #ifdef CONFIG_TARGET_IMX8QM_MEK_A72_ONLY
-static iomux_cfg_t uart2_pads[] = {
+#ifdef CONFIG_ANDROID_AUTO_SUPPORT
+	/* With eCockpit Android EVS config, the UART2 is reserved to CM4_1, so use UART1 */
+#define SC_R_UART SC_R_UART_1
+#define LPUART_LPCG LPUART_1_LPCG
+#else
+	/* With eCockpit A72 normal config, use UART2 */
+#define SC_R_UART SC_R_UART_2
+#define LPUART_LPCG LPUART_2_LPCG
+#endif
+#else
+	/* With eCockpit A53 and single-OS config, use UART0 */
+#define SC_R_UART SC_R_UART_0
+#define LPUART_LPCG LPUART_0_LPCG
+#endif
+
+static iomux_cfg_t uart_pads[] = {
+#ifdef CONFIG_TARGET_IMX8QM_MEK_A72_ONLY
+#ifdef CONFIG_ANDROID_AUTO_SUPPORT
+	SC_P_UART1_RX | MUX_PAD_CTRL(UART_PAD_CTRL),
+	SC_P_UART1_TX | MUX_PAD_CTRL(UART_PAD_CTRL),
+#else
 	SC_P_UART0_RTS_B | MUX_MODE_ALT(2) | MUX_PAD_CTRL(UART_PAD_CTRL),
 	SC_P_UART0_CTS_B | MUX_MODE_ALT(2) | MUX_PAD_CTRL(UART_PAD_CTRL),
-};
+#endif
 #else
-static iomux_cfg_t uart0_pads[] = {
 	SC_P_UART0_RX | MUX_PAD_CTRL(UART_PAD_CTRL),
 	SC_P_UART0_TX | MUX_PAD_CTRL(UART_PAD_CTRL),
-};
 #endif
+};
 
 static void setup_iomux_uart(void)
 {
-#ifdef CONFIG_TARGET_IMX8QM_MEK_A72_ONLY
-	imx8_iomux_setup_multiple_pads(uart2_pads, ARRAY_SIZE(uart2_pads));
-#else
-	imx8_iomux_setup_multiple_pads(uart0_pads, ARRAY_SIZE(uart0_pads));
-#endif
+	imx8_iomux_setup_multiple_pads(uart_pads, ARRAY_SIZE(uart_pads));
 }
 
 int board_early_init_f(void)
@@ -86,49 +101,28 @@ int board_early_init_f(void)
 
 	ipcHndl = gd->arch.ipc_channel_handle;
 
-#ifdef CONFIG_TARGET_IMX8QM_MEK_A72_ONLY
-	/* Power up UART2, this is very early while power domain is not working */
-	sciErr = sc_pm_set_resource_power_mode(ipcHndl, SC_R_UART_2, SC_PM_PW_MODE_ON);
+	/* Power up UART, this is very early while power domain is not working */
+	sciErr = sc_pm_set_resource_power_mode(ipcHndl, SC_R_UART, SC_PM_PW_MODE_ON);
 	if (sciErr != SC_ERR_NONE)
 		return 0;
 
-	/* Set UART2 clock root to 80 MHz */
+	/* Set UART clock root to 80 MHz */
 	rate = 80000000;
-	sciErr = sc_pm_set_clock_rate(ipcHndl, SC_R_UART_2, 2, &rate);
+	sciErr = sc_pm_set_clock_rate(ipcHndl, SC_R_UART, 2, &rate);
 	if (sciErr != SC_ERR_NONE)
 		return 0;
 
-	/* Enable UART2 clock root */
-	sciErr = sc_pm_clock_enable(ipcHndl, SC_R_UART_2, 2, true, false);
+	/* Enable UART clock root */
+	sciErr = sc_pm_clock_enable(ipcHndl, SC_R_UART, 2, true, false);
 	if (sciErr != SC_ERR_NONE)
 		return 0;
 
-	/* Enable UART2 clock root */
-	sciErr = sc_pm_clock_enable(ipcHndl, SC_R_UART_2, 2, true, false);
+	/* Enable UART clock root */
+	sciErr = sc_pm_clock_enable(ipcHndl, SC_R_UART, 2, true, false);
 	if (sciErr != SC_ERR_NONE)
 		return 0;
 
-	LPCG_AllClockOn(LPUART_2_LPCG);
-
-#else
-	/* Power up UART0, this is very early while power domain is not working */
-	sciErr = sc_pm_set_resource_power_mode(ipcHndl, SC_R_UART_0, SC_PM_PW_MODE_ON);
-	if (sciErr != SC_ERR_NONE)
-		return 0;
-
-	/* Set UART0 clock root to 80 MHz */
-	rate = 80000000;
-	sciErr = sc_pm_set_clock_rate(ipcHndl, SC_R_UART_0, 2, &rate);
-	if (sciErr != SC_ERR_NONE)
-		return 0;
-
-	/* Enable UART0 clock root */
-	sciErr = sc_pm_clock_enable(ipcHndl, SC_R_UART_0, 2, true, false);
-	if (sciErr != SC_ERR_NONE)
-		return 0;
-
-	LPCG_AllClockOn(LPUART_0_LPCG);
-#endif
+	LPCG_AllClockOn(LPUART_LPCG);
 
 	setup_iomux_uart();
 
@@ -527,7 +521,11 @@ void board_quiesce_devices(void)
 {
 	const char *power_on_devices[] = {
 #ifdef CONFIG_TARGET_IMX8QM_MEK_A72_ONLY
+#ifdef CONFIG_ANDROID_AUTO_SUPPORT
+		"dma_lpuart1",
+#else
 		"dma_lpuart2",
+#endif /* CONFIG_ANDROID_AUTO_SUPPORT */
 #else
 		"dma_lpuart0",
 #endif
