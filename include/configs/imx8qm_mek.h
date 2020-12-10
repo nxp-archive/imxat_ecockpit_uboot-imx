@@ -403,7 +403,11 @@
 #define CONFIG_SYS_FSL_USDHC_NUM	2
 
 #if defined(CONFIG_TARGET_IMX8QM_MEK_A72_ONLY)
+#ifdef CONFIG_ANDROID_AUTO_SUPPORT
+#define CONFIG_CONSOLE "console=ttyLP1\0"
+#else
 #define CONFIG_CONSOLE "console=ttyLP2\0"
+#endif /* CONFIG_ANDROID_AUTO_SUPPORT */
 #else
 #define CONFIG_CONSOLE "console=ttyLP0\0"
 #endif
