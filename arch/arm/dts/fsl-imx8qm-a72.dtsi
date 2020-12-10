@@ -33,7 +33,7 @@
 		dpu1 = &dpu2;
 		ethernet1 = &fec2;
 		ldb1 = &ldb2;
-		serial2 = &lpuart2;
+		serial1 = &lpuart1;
 		gpio0 = &gpio0;
 		gpio1 = &gpio1;
 		gpio2 = &gpio2;
